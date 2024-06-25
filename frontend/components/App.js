@@ -1,40 +1,37 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Image from "./Image";
-import Explanation from "./Explanation";
+import Card from "./Card";
 
-function App() {
-  const [picOfTheDayData, setPicOfTheDayData] = useState({});
-  const [isClosed, setIsClosed] = useState(false);
+const URL =
+  "https://api.nasa.gov/planetary/apod?api_key=091mMSPpOCdTLvf7K27PlD1M9iHuYerOmFgHur0w";
+
+export default function App() {
+  const [data, setData] = useState();
 
   useEffect(() => {
-    axios
-      .get(
-        "https://api.nasa.gov/planetary/apod?api_key=091mMSPpOCdTLvf7K27PlD1M9iHuYerOmFgHur0w"
-      )
-      .then((res) => {
-        setPicOfTheDayData(res.data);
-      })
-      .catch((err) => console.error(err));
+    function fetchAPOD() {
+      axios
+        .get(URL)
+        .then((res) => {
+          setData(res.data);
+        })
+        .catch((err) => {
+          console.error(err.message);
+        });
+    }
+    fetchAPOD();
   }, []);
 
-  const imageURL = picOfTheDayData.hdurl;
-  const imageTitle = picOfTheDayData.title;
-  const explanation = picOfTheDayData.explanation;
-  const buttonClick = () => {
-    setIsClosed(!isClosed);
-  };
-  const display = isClosed;
-
+  if (!data) return <p>Fetching data...</p>;
   return (
-    <>
-      <Image imageURL={imageURL} imageTitle={imageTitle} />
-      <button onClick={buttonClick}>
-        {isClosed ? "Hide Explanation" : "Show Explanation"}
-      </button>
-      {display && <Explanation explanation={explanation} />}
-    </>
+    <section>
+      <Card
+        title={data.title}
+        text={data.explanation}
+        image={data.url}
+        author={data.copyright}
+        date={data.date}
+      />
+    </section>
   );
 }
-
-export default App;
